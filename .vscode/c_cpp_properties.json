@@ -1,0 +1,26 @@
+{
+    "configurations": [
+        {
+            "name": "Linux Ubuntu",
+            "defines": [
+                "VERSION"
+            ],
+            "compilerPath": "/usr/bin/c++",
+            "compilerArgs": [
+
+            ],
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-gcc-x64",
+            "includePath": [
+                "${workspaceFolder}",
+                "${workspaceFolder}/include/**",
+                "${workspaceFolder}/source/**",
+                "/usr/include/llvm-15/**"
+
+            ],
+            "configurationProvider": "ms-vscode.cmake-tools"
+        }
+    ],
+    "version": 4
+}

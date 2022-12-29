@@ -1,0 +1,1 @@
+target_sources(ObfusC PRIVATE test.cpp)
