@@ -23,6 +23,8 @@ if(NOT LLVM_ENABLE_RTTI)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
 endif()
 
+add_definitions(-DOBFUSC_VERSION_MAJOR=0 -DOBFUSC_VERSION_MINOR=0 -DOBFUSC_VERSION_MICRO=1)
+
 # Add Target and source dir 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../lib)
 add_library(ObfusC SHARED main.cpp)

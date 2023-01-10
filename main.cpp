@@ -2,6 +2,7 @@
 #include <llvm/Passes/PassBuilder.h>
 #include <llvm/Passes/PassPlugin.h>
 #include <llvm/Support/raw_ostream.h>
+#include "common.hpp"
 
 namespace {
 
@@ -25,7 +26,8 @@ struct HelloWorld : llvm::PassInfoMixin<HelloWorld> {
 }
 
 llvm::PassPluginLibraryInfo getHelloWorldPluginInfo() {
-    return {LLVM_PLUGIN_API_VERSION, "HelloWorld", LLVM_VERSION_STRING,
+    llvm::errs() << "ObfusC Version: " << OBFUSC_VERSION_STR << "\n";
+    return {LLVM_PLUGIN_API_VERSION, "HelloWorld", OBFUSC_VERSION_STR,
         [](llvm::PassBuilder &PB) {
             PB.registerPipelineEarlySimplificationEPCallback(
             [=](llvm::ModulePassManager &MPM, llvm::OptimizationLevel Level) {
