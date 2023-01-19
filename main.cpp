@@ -4,41 +4,41 @@
 #include <llvm/Support/raw_ostream.h>
 #include "common.hpp"
 
-namespace {
-
 struct HelloWorld : llvm::PassInfoMixin<HelloWorld> {
-  // Takes IR unit to run the pass on Module and the corresponding manager
-  llvm::PreservedAnalyses run(llvm::Module& M, llvm::ModuleAnalysisManager &) {
-    for (auto&& F : M.getFunctionList()) {
-      for (auto&& A : F.getAttributes()) {
-        //TODO
-      }
-      llvm::errs() << "Hello from: "<< F.getName() << "\n";
-      llvm::errs() << "   number of arguments: " << F.arg_size() << "\n";
-    }
+    // Takes IR unit to run the pass on Module and the corresponding manager
+    llvm::PreservedAnalyses run(llvm::Module& M, llvm::ModuleAnalysisManager &) {
+        for (auto&& F : M.getFunctionList()) {
+            llvm::outs() << "Hello from: "<< F.getName() << "\n";
+            llvm::outs() << "   number of arguments: " << F.arg_size() << "\n";
+            llvm::outs() << "   number of attributes: " << F.getAttributes().getNumAttrSets() << "\n";
+            for (auto&& A : F.getAttributes()) {
+            //TODO
+                llvm::outs() << A.getAttribute("example").getAsString() << "\n";
+                llvm::outs() << A.getAsString() << "\n";
+            }
+        }
     
-    return llvm::PreservedAnalyses::all();
-  }
+        return llvm::PreservedAnalyses::all();
+    }
 
-  // If false, pass is skipped for functions decorated with the optnone attribute (e.g. -O0).
-  static bool isRequired() { return true; }
+    // If false, pass is skipped for functions decorated with the optnone attribute (e.g. -O0).
+    static bool isRequired() { return true; }
 };
-}
 
 llvm::PassPluginLibraryInfo getHelloWorldPluginInfo() {
-    llvm::errs() << "ObfusC Version: " << OBFUSC_VERSION_STR << "\n";
-    return {LLVM_PLUGIN_API_VERSION, "HelloWorld", OBFUSC_VERSION_STR,
+    llvm::outs() << "ObfusC Version: " << OBFUSC_VERSION_STR << "\n";
+    return {LLVM_PLUGIN_API_VERSION, "ObfusC", OBFUSC_VERSION_STR,
         [](llvm::PassBuilder &PB) {
             PB.registerPipelineEarlySimplificationEPCallback(
-            [=](llvm::ModulePassManager &MPM, llvm::OptimizationLevel Level) {
-                MPM.addPass(HelloWorld());
-            });
+                [=](llvm::ModulePassManager &MPM, llvm::OptimizationLevel Level) {
+                    MPM.addPass(HelloWorld());
+                }
+            );
         }
     };
 }
 
 // Dynamic Library Entrypoint
-extern "C" LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo
-llvmGetPassPluginInfo() {
-  return getHelloWorldPluginInfo();
+extern "C" LLVM_ATTRIBUTE_WEAK llvm::PassPluginLibraryInfo llvmGetPassPluginInfo() {
+    return getHelloWorldPluginInfo();
 }
