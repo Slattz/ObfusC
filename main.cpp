@@ -13,7 +13,6 @@ struct HelloWorld : llvm::PassInfoMixin<HelloWorld> {
             llvm::outs() << "   number of attributes: " << F.getAttributes().getNumAttrSets() << "\n";
             for (auto&& A : F.getAttributes()) {
             //TODO
-                llvm::outs() << A.getAttribute("example").getAsString() << "\n";
                 llvm::outs() << A.getAsString() << "\n";
             }
         }

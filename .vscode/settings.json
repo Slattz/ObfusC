@@ -2,6 +2,9 @@
     "cmake.configureOnOpen": true,
     "files.associations": {
         "*.cl": "opencl",
-        "*.inc": "cpp"
+        "*.inc": "cpp",
+        "*.tcc": "cpp",
+        "type_traits": "cpp",
+        "*.def": "cpp"
     }
 }
