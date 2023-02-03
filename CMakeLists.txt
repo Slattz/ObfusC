@@ -35,5 +35,6 @@ add_definitions(-DOBFUSC_VERSION_MAJOR=0 -DOBFUSC_VERSION_MINOR=0 -DOBFUSC_VERSI
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 
 add_library(ObfusC SHARED main.cpp)
-target_include_directories(ObfusC PRIVATE "include")
+target_include_directories(ObfusC PRIVATE "source")
+target_include_directories(ObfusC PRIVATE "source/MBA")
 add_subdirectory("source")
