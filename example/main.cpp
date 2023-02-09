@@ -1,5 +1,5 @@
 
-[[mba]] int foo(int a) {
+[[bcf]] int foo(int a) {
   return a * 2;
 }
 
