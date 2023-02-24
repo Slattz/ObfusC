@@ -3,12 +3,13 @@
 #include <llvm/Passes/PassPlugin.h>
 #include <llvm/Support/raw_ostream.h>
 #include "common.hpp"
+#include "FuncAttributeStore.hpp"
 
 struct FuncAnnotationsParser : llvm::PassInfoMixin<FuncAnnotationsParser> {
     enum AnnotationOperands {
         FUNCTION_OPERAND = 0,
         ANNOTATE_OPERAND = 1,
-        FILE_OPERAND = 2
+        FILENAME_OPERAND = 2
     };
 
     // Takes IR unit to run the pass on Module and the corresponding manager
@@ -41,6 +42,10 @@ struct FuncAnnotationsParser : llvm::PassInfoMixin<FuncAnnotationsParser> {
 struct HelloWorld2 : llvm::PassInfoMixin<HelloWorld2> {
     // Takes IR unit to run the pass on Module and the corresponding manager
     llvm::PreservedAnalyses run(llvm::Module& M, llvm::ModuleAnalysisManager &) {
+        for (auto& L : obfusc::FuncAttributeStore::GetInstance().GetAttributeNames()) {
+            llvm::outs() << "Attr Registered: " << L << "\n";
+        }
+
         for (auto&& F : M.getFunctionList()) {
             llvm::outs() << "Hello from: "<< F.getName() << "\n";
             llvm::outs() << "   number of arguments: " << F.arg_size() << "\n";

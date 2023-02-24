@@ -1,5 +1,5 @@
-#include "CffAttribute.hpp"
+#include "FuncAttribute.hpp"
 
 namespace obfusc {
-    static clang::ParsedAttrInfoRegistry::Add<CffAttribute> mbaClang("obfusc_cff", "");
+    NEW_FUNC_ATTR(Cff, 'c', 'f', 'f');
 }

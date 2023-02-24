@@ -1,5 +1,5 @@
-#include "MbaAttribute.hpp"
+#include "FuncAttribute.hpp"
 
 namespace obfusc {
-    static clang::ParsedAttrInfoRegistry::Add<MbaAttribute> mbaClang("obfusc_mba", "");
+    NEW_FUNC_ATTR(iSub, 'i', 's', 'u', 'b');
 }

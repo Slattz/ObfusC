@@ -1,5 +1,5 @@
-#include "BcfAttribute.hpp"
+#include "FuncAttribute.hpp"
 
 namespace obfusc {
-    static clang::ParsedAttrInfoRegistry::Add<BcfAttribute> mbaClang("obfusc_bcf", "");
+    NEW_FUNC_ATTR(Bcf, 'b', 'c', 'f');
 }
