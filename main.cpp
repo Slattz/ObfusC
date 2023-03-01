@@ -24,7 +24,10 @@ struct FuncAnnotationsParser : llvm::PassInfoMixin<FuncAnnotationsParser> {
                         llvm::GlobalVariable* globalStrPtr = llvm::cast<llvm::GlobalVariable>(constant->getOperand(AnnotationOperands::ANNOTATE_OPERAND));
                         if (func && globalStrPtr) {
                             if (llvm::ConstantDataArray* strArray = llvm::dyn_cast<llvm::ConstantDataArray>(globalStrPtr->getOperand(0))) { //Get Annotation str
-                                func->addFnAttr(strArray->getAsString()); //add Annotation to function
+                                llvm::StringRef str = strArray->getAsString();
+                                if (obfusc::FuncAttributeStore::GetInstance().IsAttrStored(str.data())) {
+                                    func->addFnAttr(str); //add Annotation to function
+                                }
                             }
                         }
                     }
@@ -42,10 +45,6 @@ struct FuncAnnotationsParser : llvm::PassInfoMixin<FuncAnnotationsParser> {
 struct HelloWorld2 : llvm::PassInfoMixin<HelloWorld2> {
     // Takes IR unit to run the pass on Module and the corresponding manager
     llvm::PreservedAnalyses run(llvm::Module& M, llvm::ModuleAnalysisManager &) {
-        for (auto& L : obfusc::FuncAttributeStore::GetInstance().GetAttributeNames()) {
-            llvm::outs() << "Attr Registered: " << L << "\n";
-        }
-
         for (auto&& F : M.getFunctionList()) {
             llvm::outs() << "Hello from: "<< F.getName() << "\n";
             llvm::outs() << "   number of arguments: " << F.arg_size() << "\n";

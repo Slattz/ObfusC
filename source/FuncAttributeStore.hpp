@@ -4,20 +4,15 @@
 namespace obfusc {
     class FuncAttributeStore {
     public:
-        static FuncAttributeStore& GetInstance() {
-            static FuncAttributeStore x;
-            return x;
-        }
-
-        const std::vector<const char*>& GetAttributeNames() {
-            return m_names;
-        }
-
-        void StoreAttributeName(const char* name) {
-            m_names.push_back(name);
-        }
+        static FuncAttributeStore& GetInstance();
+        bool IsAttrStored(const char* attr);
+        void StoreAttributeName(const char* attr);
         
     private:
-        std::vector<const char*> m_names;
+        struct AttrStoreInfo {
+            const char* name;
+            size_t size;
+        };
+        std::vector<AttrStoreInfo> m_info;
     };
 }
