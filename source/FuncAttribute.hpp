@@ -1,9 +1,11 @@
 #pragma once
 
-#include "clang/Sema/ParsedAttr.h"
-#include "clang/Sema/Sema.h"
-#include "clang/Sema/SemaDiagnostic.h"
+#include <clang/Sema/ParsedAttr.h>
+#include <clang/Sema/Sema.h>
+#include <clang/Sema/SemaDiagnostic.h>
 #include "FuncAttributeStore.hpp"
+#include "IObfuscationPass.hpp"
+
 
 namespace obfusc {
     template<typename passType, const char... obfName>
@@ -52,6 +54,7 @@ namespace obfusc {
 
     //name ## Pass class (e.g. MbaPass) needs to be included before using this macro.
     #define NEW_FUNC_ATTR(name, ...) \
+        static_assert(std::is_convertible<name ## Pass*, IObfuscationPass*>::value, #name "Pass must inherit IObfuscationPass as public"); \
         class name ## Attribute : public FuncAttribute<name ## Pass, __VA_ARGS__> { }; \
         static clang::ParsedAttrInfoRegistry::Add<name ## Attribute> name ## Clang("obfusc_" #name, "") 
 
