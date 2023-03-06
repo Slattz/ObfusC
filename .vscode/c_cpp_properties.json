@@ -14,7 +14,6 @@
             "intelliSenseMode": "linux-clang-x64",
             "includePath": [
                 "${workspaceFolder}",
-                "${workspaceFolder}/include/**",
                 "${workspaceFolder}/source/**",
                 "/usr/include/llvm-15/**"
 
