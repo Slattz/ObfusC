@@ -1,13 +1,15 @@
 
 [[obfusc::bcf]] int foo(int a) {
-  return a * 2;
+    return a * 2;
 }
 
 __attribute__((mba)) int main(int argc, char *argv[]) {
-  int a = 1;
-  int ret = 0;
+    int a = 5;
+    int b = 2;
 
-  ret += foo(a);
+    int ret = (a-b);
 
-  return ret;
+    ret += foo(ret);
+
+    return ret;
 }

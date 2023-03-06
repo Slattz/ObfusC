@@ -1,5 +1,7 @@
 #pragma once
 #include <llvm/Passes/PassBuilder.h>
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/Transforms/Utils/BasicBlockUtils.h>
 
 class IObfuscationPass {
 public:

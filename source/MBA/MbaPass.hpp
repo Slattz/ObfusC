@@ -8,5 +8,9 @@ namespace obfusc {
         ~MbaPass() override;
 
         bool obfuscate(llvm::Module& mod, llvm::Function& func) override;
+
+    private:
+        bool RunMbaAdd(llvm::BasicBlock& block, llvm::BasicBlock::iterator& itr);
+        bool RunMbaSub(llvm::BasicBlock& block, llvm::BasicBlock::iterator& itr);
     };
 }
