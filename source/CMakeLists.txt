@@ -1,7 +1,6 @@
 target_sources(ObfusC PRIVATE FuncAttribute.hpp)
 target_sources(ObfusC PRIVATE FuncAttributeStore.hpp)
 target_sources(ObfusC PRIVATE FuncAttributeStore.cpp)
-target_sources(ObfusC PRIVATE IObfuscationPass.hpp)
 target_sources(ObfusC PRIVATE common.hpp)
 add_subdirectory("MBA")
 add_subdirectory("BCF")

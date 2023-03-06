@@ -6,7 +6,7 @@
 #include "FuncAttributeStore.hpp"
 
 namespace obfusc {
-    template<const char... obfName>
+    template<typename passType, const char... obfName>
     class FuncAttribute : public clang::ParsedAttrInfo {
     public:
         virtual bool diagAppertainsToDecl(clang::Sema& S, const clang::ParsedAttr& Attr, const clang::Decl* D) const override {
@@ -46,12 +46,14 @@ namespace obfusc {
 
             Spellings = S;
 
-            FuncAttributeStore::GetInstance().StoreAttributeName(nameStr);
+            FuncAttributeStore::GetInstance().StoreAttributeInfo(nameStr, new passType());
         }
     };
 
+    //name ## Pass class (e.g. MbaPass) needs to be included before using this macro.
     #define NEW_FUNC_ATTR(name, ...) \
-        class name ## Attribute : public FuncAttribute<__VA_ARGS__> { }; \
-        static clang::ParsedAttrInfoRegistry::Add<name ## Attribute> name ## Clang("obfusc_" #name, "")
+        class name ## Attribute : public FuncAttribute<name ## Pass, __VA_ARGS__> { }; \
+        static clang::ParsedAttrInfoRegistry::Add<name ## Attribute> name ## Clang("obfusc_" #name, "") 
+
 
 }
