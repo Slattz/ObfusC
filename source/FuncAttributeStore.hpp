@@ -11,6 +11,8 @@ namespace obfusc {
         void StoreAttributeInfo(const char* name, IObfuscationPass* pass);
         
     private:
+        FuncAttributeStore();
+
         struct AttrStoreInfo {
             const char* name;
             IObfuscationPass* pass;
