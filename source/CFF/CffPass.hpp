@@ -7,6 +7,6 @@ namespace obfusc {
         CffPass();
         ~CffPass() override;
 
-        bool obfuscate(llvm::Module& mod) override;
+        bool obfuscate(llvm::Module& mod, llvm::Function& func) override;
     };
 }

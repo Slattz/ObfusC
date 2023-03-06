@@ -7,13 +7,19 @@ namespace obfusc {
         return x;
     }
 
-    bool FuncAttributeStore::IsAttrStored(const char* attr) {
-        if (!attr || strlen(attr) < 1) {
+    bool FuncAttributeStore::IsAttrStored(llvm::StringRef& attr) {
+        if (attr.size() < 2) {
             return false;
         }
 
+        const char* attrCStr = attr.data();
+
+        if (attr[0] == '\"') {
+            attrCStr = attr.substr(1, attr.size()-2).data();
+        }
+
         for (auto& info : m_info) {
-            if (strncasecmp(info.name, attr, info.size) == 0) {
+            if (strncasecmp(info.name, attrCStr, info.size) == 0) {
                 return true;
             }
         }
@@ -21,13 +27,19 @@ namespace obfusc {
         return false;
     }
 
-    IObfuscationPass* FuncAttributeStore::GetAttrPass(const char* attr) {
-        if (!attr || strlen(attr) < 1) {
+    IObfuscationPass* FuncAttributeStore::GetAttrPass(llvm::StringRef&& attr) {
+        if (attr.size() < 2) {
             return nullptr;
         }
 
+        const char* attrCStr = attr.data();
+
+        if (attr[0] == '\"') {
+            attrCStr = attr.substr(1, attr.size()-2).data();
+        }
+
         for (auto& info : m_info) {
-            if (strncasecmp(info.name, attr, info.size) == 0) {
+            if (strncasecmp(info.name, attrCStr, info.size) == 0) {
                 return info.pass;
             }
         }

@@ -4,7 +4,7 @@ namespace obfusc {
     CffPass::CffPass() {}
     CffPass::~CffPass() {}
 
-    bool CffPass::obfuscate(llvm::Module& mod) {
+    bool CffPass::obfuscate(llvm::Module& mod, llvm::Function& func) {
         return true;
     }
 

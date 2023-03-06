@@ -23,7 +23,7 @@ namespace obfusc {
 
             if (llvm::ConstantDataArray* strArray = llvm::dyn_cast<llvm::ConstantDataArray>(globalStrPtr->getOperand(0))) { //Get Annotation str
                 llvm::StringRef str = strArray->getAsString();
-                if (FuncAttributeStore::GetInstance().IsAttrStored(str.data())) {
+                if (FuncAttributeStore::GetInstance().IsAttrStored(str)) {
                     func->addFnAttr(str); //add Annotation to function
                 }
             }

@@ -1,17 +1,18 @@
 #pragma once
 #include <vector>
+#include <llvm/ADT/StringRef.h>
 #include "IObfuscationPass.hpp"
 
 namespace obfusc {
     class FuncAttributeStore {
     public:
         static FuncAttributeStore& GetInstance();
-        bool IsAttrStored(const char* attr);
-        IObfuscationPass* GetAttrPass(const char* attr);
+        bool IsAttrStored(llvm::StringRef& attr);
+        IObfuscationPass* GetAttrPass(llvm::StringRef&& attr);
         void StoreAttributeInfo(const char* name, IObfuscationPass* pass);
         
     private:
-        FuncAttributeStore();
+        FuncAttributeStore() {}
 
         struct AttrStoreInfo {
             const char* name;
