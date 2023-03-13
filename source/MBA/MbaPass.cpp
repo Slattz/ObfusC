@@ -18,9 +18,8 @@ namespace obfusc {
                 llvm::IRBuilder irBuilder(binOp);
                 llvm::outs() << "Op 0: " << *binOp << "\n";
                 llvm::Value* op1 = Substitute(irBuilder, binOp->getType(), binOp->getOperand(0));
-                llvm::Value* op2 = Substitute(irBuilder, binOp->getType(), binOp->getOperand(1));
-                //llvm::Value* op2 = binOp->getOperand(1);
                 //llvm::Value* op2 = Substitute(irBuilder, binOp->getType(), binOp->getOperand(1));
+                llvm::Value* op2 = binOp->getOperand(1);
 
                 llvm::Instruction* newInstrs;
                 unsigned opCode = binOp->getOpcode();
@@ -44,21 +43,22 @@ namespace obfusc {
     }
 
     llvm::Value* MbaPass::Substitute(llvm::IRBuilder<>& irBuilder, llvm::Type* type, llvm::Value* operand, size_t numRecursions) {
-        int randType = rand() % SubstituteType::Multiply;
+        int randType = rand() % SubstituteType::Max;
 
         llvm::outs() << "Op: " << numRecursions << "\t" << *operand << "\n";
 
-        //randType = SubstituteType::Subtract;
         if (numRecursions >= s_RecursiveAmount) {
             return operand;
         }
 
+        //randType = SubstituteType::Add;
         if (randType == SubstituteType::Add) {
             int randNum = rand()%(type->getIntegerBitWidth()*32);
 
             auto randVal = llvm::ConstantInt::get(type, randNum);
-            auto a = Substitute(irBuilder, type, irBuilder.CreateSub(operand, randVal), numRecursions+1);
-            auto instr = irBuilder.CreateAdd(a, randVal);
+            auto b = irBuilder.CreateMul(operand, randVal);
+            auto a = Substitute(irBuilder, type, irBuilder.CreateSub(operand, b), numRecursions+1);
+            auto instr = irBuilder.CreateAdd(a, b);
 
             return instr;
         }
@@ -67,8 +67,9 @@ namespace obfusc {
             int randNum = rand()%(type->getIntegerBitWidth()*32);
 
             auto randVal = llvm::ConstantInt::get(type, randNum);
-            auto a = Substitute(irBuilder, type, irBuilder.CreateAdd(operand, randVal), numRecursions+1);
-            auto instr = irBuilder.CreateSub(a, randVal);
+            auto b = irBuilder.CreateMul(operand, randVal);
+            auto a = Substitute(irBuilder, type, irBuilder.CreateAdd(operand, b), numRecursions+1);
+            auto instr = irBuilder.CreateSub(a, b);
 
             return instr;
         }

@@ -13,12 +13,10 @@ namespace obfusc {
         enum SubstituteType : int {
             Add = 0,
             Subtract,
-            Multiply,
-            Divide,
             Max
         };
 
-        static constexpr size_t s_RecursiveAmount = 3;
+        static constexpr size_t s_RecursiveAmount = 2;
 
         llvm::Value* Substitute(llvm::IRBuilder<>& irBuilder, llvm::Type* type, llvm::Value* operand, size_t numRecursions = 0);
         bool RunMbaAdd(llvm::BasicBlock& block, llvm::BasicBlock::iterator& itr);
