@@ -13,13 +13,14 @@ namespace obfusc {
         enum SubstituteType : int {
             Add = 0,
             Subtract,
+            Divide,
+            Not,
             Max
         };
 
         static constexpr size_t s_RecursiveAmount = 2;
 
+        int GetRandomNumber(llvm::Type* type);
         llvm::Value* Substitute(llvm::IRBuilder<>& irBuilder, llvm::Type* type, llvm::Value* operand, size_t numRecursions = 0);
-        bool RunMbaAdd(llvm::BasicBlock& block, llvm::BasicBlock::iterator& itr);
-        bool RunMbaSub(llvm::BasicBlock& block, llvm::BasicBlock::iterator& itr);
     };
 }

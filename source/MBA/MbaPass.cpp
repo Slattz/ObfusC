@@ -42,6 +42,11 @@ namespace obfusc {
         return changed;
     }
 
+    int MbaPass::GetRandomNumber(llvm::Type* type) {
+        return rand()%(type->getIntegerBitWidth()*32);
+    }
+
+
     llvm::Value* MbaPass::Substitute(llvm::IRBuilder<>& irBuilder, llvm::Type* type, llvm::Value* operand, size_t numRecursions) {
         int randType = rand() % SubstituteType::Max;
 
@@ -51,10 +56,9 @@ namespace obfusc {
             return operand;
         }
 
-        //randType = SubstituteType::Add;
+        randType = SubstituteType::Not;
+        int randNum = GetRandomNumber(type);
         if (randType == SubstituteType::Add) {
-            int randNum = rand()%(type->getIntegerBitWidth()*32);
-
             auto randVal = llvm::ConstantInt::get(type, randNum);
             auto b = irBuilder.CreateMul(operand, randVal);
             auto a = Substitute(irBuilder, type, irBuilder.CreateSub(operand, b), numRecursions+1);
@@ -64,12 +68,25 @@ namespace obfusc {
         }
 
         else if (randType == SubstituteType::Subtract) {
-            int randNum = rand()%(type->getIntegerBitWidth()*32);
-
             auto randVal = llvm::ConstantInt::get(type, randNum);
             auto b = irBuilder.CreateMul(operand, randVal);
             auto a = Substitute(irBuilder, type, irBuilder.CreateAdd(operand, b), numRecursions+1);
             auto instr = irBuilder.CreateSub(a, b);
+
+            return instr;
+        }
+
+        else if (randType == SubstituteType::Divide) {
+            auto randVal = llvm::ConstantInt::get(type, randNum);
+            auto a = Substitute(irBuilder, type, irBuilder.CreateMul(operand, randVal), numRecursions+1);
+            auto instr = irBuilder.CreateUDiv(a, randVal);
+
+            return instr;
+        }
+
+        else if (randType == SubstituteType::Not) {
+            auto a = Substitute(irBuilder, type, irBuilder.CreateNot(operand), numRecursions+1);
+            auto instr = irBuilder.CreateNot(a);
 
             return instr;
         }
