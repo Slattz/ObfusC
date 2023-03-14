@@ -18,8 +18,8 @@ namespace obfusc {
                 llvm::IRBuilder irBuilder(binOp);
                 llvm::outs() << "Op 0: " << *binOp << "\n";
                 llvm::Value* op1 = Substitute(irBuilder, binOp->getType(), binOp->getOperand(0));
-                //llvm::Value* op2 = Substitute(irBuilder, binOp->getType(), binOp->getOperand(1));
-                llvm::Value* op2 = binOp->getOperand(1);
+                llvm::Value* op2 = Substitute(irBuilder, binOp->getType(), binOp->getOperand(1));
+                //llvm::Value* op2 = binOp->getOperand(1);
 
                 llvm::Instruction* newInstrs;
                 unsigned opCode = binOp->getOpcode();
@@ -48,52 +48,46 @@ namespace obfusc {
 
 
     llvm::Value* MbaPass::Substitute(llvm::IRBuilder<>& irBuilder, llvm::Type* type, llvm::Value* operand, size_t numRecursions) {
-        int randType = rand() % SubstituteType::Max;
-
         llvm::outs() << "Op: " << numRecursions << "\t" << *operand << "\n";
-
         if (numRecursions >= s_RecursiveAmount) {
             return operand;
         }
 
-        randType = SubstituteType::Not;
+        int randType = rand() % SubstituteType::Max;
         int randNum = GetRandomNumber(type);
+
         if (randType == SubstituteType::Add) {
             auto randVal = llvm::ConstantInt::get(type, randNum);
             auto b = irBuilder.CreateMul(operand, randVal);
             auto a = Substitute(irBuilder, type, irBuilder.CreateSub(operand, b), numRecursions+1);
-            auto instr = irBuilder.CreateAdd(a, b);
-
-            return instr;
+            return irBuilder.CreateAdd(a, b);
         }
 
         else if (randType == SubstituteType::Subtract) {
             auto randVal = llvm::ConstantInt::get(type, randNum);
             auto b = irBuilder.CreateMul(operand, randVal);
             auto a = Substitute(irBuilder, type, irBuilder.CreateAdd(operand, b), numRecursions+1);
-            auto instr = irBuilder.CreateSub(a, b);
-
-            return instr;
+            return irBuilder.CreateSub(a, b);
         }
 
         else if (randType == SubstituteType::Divide) {
             auto randVal = llvm::ConstantInt::get(type, randNum);
             auto a = Substitute(irBuilder, type, irBuilder.CreateMul(operand, randVal), numRecursions+1);
-            auto instr = irBuilder.CreateUDiv(a, randVal);
-
-            return instr;
+            return irBuilder.CreateUDiv(a, randVal);
         }
 
         else if (randType == SubstituteType::Not) {
             auto a = Substitute(irBuilder, type, irBuilder.CreateNot(operand), numRecursions+1);
-            auto instr = irBuilder.CreateNot(a);
-
-            return instr;
+            return irBuilder.CreateNot(a);
         }
 
-        else {
-            return operand;
+        else if (randType == SubstituteType::Xor) {
+            auto randVal = llvm::ConstantInt::get(type, randNum);
+            auto a = Substitute(irBuilder, type, irBuilder.CreateXor(operand, randVal), numRecursions+1);
+            return irBuilder.CreateXor(a, randVal);
         }
+
+        return operand;
     }
     
 }
