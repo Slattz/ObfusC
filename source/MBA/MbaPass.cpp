@@ -16,10 +16,13 @@ namespace obfusc {
                     continue;
 
                 llvm::IRBuilder irBuilder(binOp);
-                llvm::outs() << "Op 0: " << *binOp << "\n";
-                llvm::Value* op1 = Substitute(irBuilder, binOp->getType(), binOp->getOperand(0));
-                llvm::Value* op2 = Substitute(irBuilder, binOp->getType(), binOp->getOperand(1));
-                //llvm::Value* op2 = binOp->getOperand(1);
+                llvm::Type* newType = llvm::IntegerType::getInt128Ty(binOp->getType()->getContext());
+
+                llvm::Value* op1 = GenStackAlignmentCode(irBuilder, newType, binOp->getOperand(0));
+                llvm::Value* op2 = GenStackAlignmentCode(irBuilder, newType, binOp->getOperand(1));
+
+                op1 = Substitute(irBuilder, newType, op1);
+                op2 = Substitute(irBuilder, newType, op2);
 
                 llvm::Instruction* newInstrs;
                 unsigned opCode = binOp->getOpcode();
@@ -46,6 +49,13 @@ namespace obfusc {
         return rand()%(type->getIntegerBitWidth()*32);
     }
 
+    llvm::Value* MbaPass::GenStackAlignmentCode(llvm::IRBuilder<>& irBuilder, llvm::Type* newType, llvm::Value* operand) {
+        llvm::Instruction* alloc = irBuilder.CreateAlloca(newType);
+        auto constZero = llvm::ConstantInt::get(newType, 0);
+        llvm::Instruction* store = irBuilder.CreateStore(constZero, alloc);
+        store = irBuilder.CreateStore(operand, alloc);
+        return irBuilder.CreateLoad(newType, alloc);
+    }
 
     llvm::Value* MbaPass::Substitute(llvm::IRBuilder<>& irBuilder, llvm::Type* type, llvm::Value* operand, size_t numRecursions) {
         llvm::outs() << "Op: " << numRecursions << "\t" << *operand << "\n";
@@ -53,27 +63,35 @@ namespace obfusc {
             return operand;
         }
 
+        llvm::Instruction* instr = llvm::dyn_cast<llvm::Instruction>(operand);
+        if (instr) {
+            unsigned int opCode = instr->getOpcode();
+            if ((opCode == llvm::Instruction::Add) || (opCode == llvm::Instruction::Sub) || (opCode == llvm::Instruction::UDiv) ||
+                (opCode == llvm::Instruction::SDiv) || (opCode == llvm::Instruction::Xor)
+            ) {
+                operand->mutateType(type);
+            }
+        }
+
         int randType = rand() % SubstituteType::Max;
-        int randNum = GetRandomNumber(type);
+        uint64_t randNum = GetRandomNumber(type);
 
         if (randType == SubstituteType::Add) {
             auto randVal = llvm::ConstantInt::get(type, randNum);
-            auto b = irBuilder.CreateMul(operand, randVal);
-            auto a = Substitute(irBuilder, type, irBuilder.CreateSub(operand, b), numRecursions+1);
-            return irBuilder.CreateAdd(a, b);
+            auto a = Substitute(irBuilder, type, irBuilder.CreateSub(operand, randVal), numRecursions+1);
+            return irBuilder.CreateAdd(a, randVal);
         }
 
         else if (randType == SubstituteType::Subtract) {
             auto randVal = llvm::ConstantInt::get(type, randNum);
-            auto b = irBuilder.CreateMul(operand, randVal);
-            auto a = Substitute(irBuilder, type, irBuilder.CreateAdd(operand, b), numRecursions+1);
-            return irBuilder.CreateSub(a, b);
+            auto a = Substitute(irBuilder, type, irBuilder.CreateAdd(operand, randVal), numRecursions+1);
+            return irBuilder.CreateSub(a, randVal);
         }
 
         else if (randType == SubstituteType::Divide) {
             auto randVal = llvm::ConstantInt::get(type, randNum);
             auto a = Substitute(irBuilder, type, irBuilder.CreateMul(operand, randVal), numRecursions+1);
-            return irBuilder.CreateUDiv(a, randVal);
+            return irBuilder.CreateSDiv(a, randVal);
         }
 
         else if (randType == SubstituteType::Not) {

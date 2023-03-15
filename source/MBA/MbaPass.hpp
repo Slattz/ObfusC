@@ -19,9 +19,10 @@ namespace obfusc {
             Max
         };
 
-        static constexpr size_t s_RecursiveAmount = 5;
+        static constexpr size_t s_RecursiveAmount = 10;
 
         int GetRandomNumber(llvm::Type* type);
+        llvm::Value* GenStackAlignmentCode(llvm::IRBuilder<>& irBuilder, llvm::Type* newType, llvm::Value* operand);
         llvm::Value* Substitute(llvm::IRBuilder<>& irBuilder, llvm::Type* type, llvm::Value* operand, size_t numRecursions = 0);
     };
 }
