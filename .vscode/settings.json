@@ -5,6 +5,7 @@
         "*.inc": "cpp",
         "*.tcc": "cpp",
         "type_traits": "cpp",
-        "*.def": "cpp"
+        "*.def": "cpp",
+        "limits": "cpp"
     }
 }

@@ -1,13 +1,17 @@
 #include "MbaPass.hpp"
 #include <cstdlib>
+#include <limits>
 
 namespace obfusc {
-    MbaPass::MbaPass() {}
+    MbaPass::MbaPass() {
+        std::random_device rd;
+        m_randGen64.seed(rd());
+    }
+    
     MbaPass::~MbaPass() {}
 
     bool MbaPass::obfuscate(llvm::Module& mod, llvm::Function& func) {
         bool changed = false;
-        srand(2);
 
         for (auto& block : func) {
             for (auto instruction = block.begin(); instruction != block.end(); instruction++) {
@@ -80,7 +84,18 @@ namespace obfusc {
     }
 
     int MbaPass::GetRandomNumber(llvm::Type* type) {
-        return rand()%(type->getIntegerBitWidth()*32);
+        uint64_t modNum = UCHAR_MAX; 
+        if (type->getIntegerBitWidth() == 16) {
+            modNum = UCHAR_MAX;
+        } else if (type->getIntegerBitWidth() == 32) {
+            modNum = USHRT_MAX;
+        } else if (type->getIntegerBitWidth() == 64) {
+            modNum = UINT_MAX;
+        } else if (type->getIntegerBitWidth() == 128) {
+            modNum = ULLONG_MAX;
+        }
+
+        return m_randGen64()%modNum;
     }
 
     llvm::Value* MbaPass::GenStackAlignmentCode(llvm::IRBuilder<>& irBuilder, llvm::Type* newType, llvm::Value* operand) {

@@ -1,5 +1,6 @@
 #pragma once
 #include "IObfuscationPass.hpp"
+#include <random>
 
 namespace obfusc {
     class MbaPass : public IObfuscationPass {
@@ -20,6 +21,7 @@ namespace obfusc {
         };
 
         static constexpr size_t s_RecursiveAmount = 10;
+        std::mt19937_64 m_randGen64;
 
         int GetRandomNumber(llvm::Type* type);
         llvm::Value* GenStackAlignmentCode(llvm::IRBuilder<>& irBuilder, llvm::Type* newType, llvm::Value* operand);
