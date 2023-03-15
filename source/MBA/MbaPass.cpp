@@ -26,16 +26,50 @@ namespace obfusc {
 
                 llvm::Instruction* newInstrs;
                 unsigned opCode = binOp->getOpcode();
-                if (opCode == llvm::Instruction::Add) {
+                switch (opCode) {
+                case llvm::Instruction::Add:
                     newInstrs = llvm::BinaryOperator::CreateAdd(op1, op2);
-                }
-                // else if (opCode == llvm::Instruction::Sub) {
-                    // newInstrs = llvm::BinaryOperator::CreateSub(op1, op2);
-                // }
-                else {
+                    break;
+
+                case llvm::Instruction::Sub:
+                    newInstrs = llvm::BinaryOperator::CreateSub(op1, op2);
+                    break;
+
+                case llvm::Instruction::Mul:
+                    newInstrs = llvm::BinaryOperator::CreateMul(op1, op2);
+                    break;
+
+                case llvm::Instruction::UDiv:
+                    newInstrs = llvm::BinaryOperator::CreateUDiv(op1, op2);
+                    break;
+
+                case llvm::Instruction::SDiv:
+                    newInstrs = llvm::BinaryOperator::CreateSDiv(op1, op2);
+                    break;
+
+                case llvm::Instruction::And:
+                    newInstrs = llvm::BinaryOperator::CreateAnd(op1, op2);
+                    break;
+
+                case llvm::Instruction::Or:
+                    newInstrs = llvm::BinaryOperator::CreateOr(op1, op2);
+                    break;
+
+                case llvm::Instruction::Xor:
+                    newInstrs = llvm::BinaryOperator::CreateXor(op1, op2);
+                    break;
+
+                case llvm::Instruction::LShr:
+                    newInstrs = llvm::BinaryOperator::CreateLShr(op1, op2);
+                    break;
+
+                case llvm::Instruction::Shl:
+                    newInstrs = llvm::BinaryOperator::CreateShl(op1, op2);
+                    break;
+
+                default:
                     continue;
                 }
-
 
                 llvm::ReplaceInstWithInst(block.getInstList(), instruction, newInstrs);
                 changed = true;
