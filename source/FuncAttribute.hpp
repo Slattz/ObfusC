@@ -21,14 +21,20 @@ namespace obfusc {
 
         virtual AttrHandling handleDeclAttribute(clang::Sema& S, clang::Decl* D, const clang::ParsedAttr& Attr) const override {
             if (!D->getDeclContext()->isFileContext()) { //Check if the decl is at file scope.
-                unsigned ID = S.getDiagnostics().getDiagnosticIDs()->getCustomDiagID(clang::DiagnosticIDs::Error, Attr.getAttrName()->deuglifiedName());
-                S.Diag(Attr.getLoc(), ID) << " attribute only allowed at file scope";
+                std::string attrStr(Attr.getAttrName()->deuglifiedName().data());
+                attrStr.append(" attribute only allowed at file scope");
+
+                unsigned ID = S.getDiagnostics().getDiagnosticIDs()->getCustomDiagID(clang::DiagnosticIDs::Error, llvm::StringRef(attrStr));
+                S.Diag(Attr.getLoc(), ID);
                 return AttributeNotApplied;
             }
         
             if (Attr.getNumArgs() > OptArgs) {
-                unsigned ID = S.getDiagnostics().getDiagnosticIDs()->getCustomDiagID(clang::DiagnosticIDs::Error, Attr.getAttrName()->deuglifiedName());
-                S.Diag(Attr.getLoc(), ID) << "attribute only accepts no arguments";
+                std::string attrStr(Attr.getAttrName()->deuglifiedName().data());
+                attrStr.append("attribute only accepts no arguments");
+
+                unsigned ID = S.getDiagnostics().getDiagnosticIDs()->getCustomDiagID(clang::DiagnosticIDs::Error, llvm::StringRef(attrStr));
+                S.Diag(Attr.getLoc(), ID);
                 return AttributeNotApplied;
             }
 
