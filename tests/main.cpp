@@ -9,7 +9,9 @@ typedef int valType;
     return ret1;
 }
 
-__attribute__((mba)) int main(int argc, char *argv[]) {
+#ifndef OBFUSC_TEST_BUILD_ALL
+
+int main(int argc, char *argv[]) {
     valType a = 13;
     valType b = 11;
 
@@ -17,3 +19,5 @@ __attribute__((mba)) int main(int argc, char *argv[]) {
 
     return 0;
 }
+
+#endif

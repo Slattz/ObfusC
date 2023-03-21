@@ -1,0 +1,60 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run Test",
+            "type": "shell",
+            "command": "/usr/bin/clang++-15",
+            "options": {
+                "cwd": "${workspaceFolder}/tests"
+            },
+            "args": [
+                "-g",
+                "-std=c++2b",
+                "-fplugin=${workspaceFolder}/lib/libObfusC.so",
+                "-fpass-plugin=${workspaceFolder}/lib/libObfusC.so",
+                "${file}",
+                "-o",
+                "${fileDirname}/${fileBasenameNoExtension}"
+            ],
+            "problemMatcher": ["$gcc"],
+            "group": {
+                "kind": "build"
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Run All Tests",
+            "type": "shell",
+            "command": "/usr/bin/clang++-15",
+            "options": {
+                "cwd": "${workspaceFolder}/tests"
+            },
+            "args": [
+                "-g",
+                "-std=c++2b",
+                "-DOBFUSC_TEST_BUILD_ALL",
+                "-fplugin=${workspaceFolder}/lib/libObfusC.so",
+                "-fpass-plugin=${workspaceFolder}/lib/libObfusC.so",
+                "${fileDirname}/**.cpp",
+                "-o",
+                "${fileDirname}/${fileBasenameNoExtension}"
+            ],
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build"
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            }
+        }
+    ]
+}
