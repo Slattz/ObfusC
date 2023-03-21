@@ -20,13 +20,15 @@ namespace obfusc {
         }
 
         virtual AttrHandling handleDeclAttribute(clang::Sema& S, clang::Decl* D, const clang::ParsedAttr& Attr) const override {
-            if (!D->getDeclContext()->isFileContext()) { //Check if the decl is at file scope.
-                std::string attrStr(Attr.getAttrName()->deuglifiedName().data());
-                attrStr.append(" attribute only allowed at file scope");
+            if ((!D->getDeclContext()->isFileContext())) { //Check if the decl is at file scope
+                if (D->getDeclContext()->getDeclKind() != clang::Decl::Kind::CXXRecord) { //or if it's a lambda (other CXXRecords are covered by diagAppertainsToDecl)
+                    std::string attrStr(Attr.getAttrName()->deuglifiedName().data());
+                    attrStr.append(" attribute only allowed at file scope and on lambdas");
 
-                unsigned ID = S.getDiagnostics().getDiagnosticIDs()->getCustomDiagID(clang::DiagnosticIDs::Error, llvm::StringRef(attrStr));
-                S.Diag(Attr.getLoc(), ID);
-                return AttributeNotApplied;
+                    unsigned ID = S.getDiagnostics().getDiagnosticIDs()->getCustomDiagID(clang::DiagnosticIDs::Error, llvm::StringRef(attrStr));
+                    S.Diag(Attr.getLoc(), ID);
+                    return AttributeNotApplied;
+                }
             }
         
             if (Attr.getNumArgs() > OptArgs) {
