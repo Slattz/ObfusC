@@ -20,13 +20,13 @@ namespace obfusc {
                     continue;
 
                 llvm::IRBuilder irBuilder(binOp);
-                llvm::Type* newType = llvm::IntegerType::getInt128Ty(binOp->getType()->getContext()); //Set type to 128 bit to account for possible int overflows
+                llvm::Type* newType = llvm::IntegerType::getInt128Ty(binOp->getType()->getContext()); //Set type to 128 bit to account for possible uint64 overflows
 
                 llvm::Value* op1 = GenStackAlignmentCode(irBuilder, newType, binOp->getOperand(0));
                 llvm::Value* op2 = GenStackAlignmentCode(irBuilder, newType, binOp->getOperand(1));
 
-                op1 = Substitute(irBuilder, newType, op1); //Generate MBA for op1
-                op2 = Substitute(irBuilder, newType, op2); //Generate MBA for op2
+                op1 = Substitute(irBuilder, newType, binOp->getType(), op1); //Generate MBA for op1
+                op2 = Substitute(irBuilder, newType, binOp->getType(), op2); //Generate MBA for op2
 
                 llvm::Instruction* newInstrs;
                 unsigned opCode = binOp->getOpcode();
@@ -78,27 +78,36 @@ namespace obfusc {
                 llvm::ReplaceInstWithInst(block.getInstList(), instruction, newInstrs); //replace old instruction with new obfuscation instructions
                 changed = true;
             }
-
-            llvm::outs() << "Function " << func.getName() << " Has Been Obfuscated: " << changed << "\n";
         }
 
         return changed;
     }
 
     /* Get a random number that is half the types bit length (e.g. 64 bit for 128 bit values) */
-    int MbaPass::GetRandomNumber(llvm::Type* type) {
-        uint64_t modNum = UCHAR_MAX; 
-        if (type->getIntegerBitWidth() == 16) {
-            modNum = UCHAR_MAX;
-        } else if (type->getIntegerBitWidth() == 32) {
+    uint64_t MbaPass::GetRandomNumber(llvm::Type* type) {
+        uint64_t modNum = UCHAR_MAX; //UCHAR_MAX covers 8-bit and 16-bit
+        if (type->getIntegerBitWidth() == 32) { //32-bit
             modNum = USHRT_MAX;
-        } else if (type->getIntegerBitWidth() == 64) {
+        } else if (type->getIntegerBitWidth() >= 64) { //64-bit and 128-bit
             modNum = UINT_MAX;
-        } else if (type->getIntegerBitWidth() == 128) {
-            modNum = ULLONG_MAX;
         }
 
         return m_randGen64()%modNum;
+    }
+
+    uint64_t MbaPass::GetSignedMax(llvm::Type* type) {
+        switch (type->getIntegerBitWidth()) {
+        case 8:
+            return CHAR_MAX;
+        case 16:
+            return SHRT_MAX;
+        case 32:
+            return INT_MAX;
+        case 64:
+            return LLONG_MAX;
+        default:
+            return CHAR_MAX;
+        }
     }
 
     /* Gen loads and stores to convert initial value to a 128 bit value (e.g. 32 bit to 128 bit) */
@@ -111,7 +120,7 @@ namespace obfusc {
     }
 
     /* Recursive function to generate the various mixed arithmetic IR. Essentially creates a reversible tree of IR instructions */
-    llvm::Value* MbaPass::Substitute(llvm::IRBuilder<>& irBuilder, llvm::Type* type, llvm::Value* operand, size_t numRecursions) {
+    llvm::Value* MbaPass::Substitute(llvm::IRBuilder<>& irBuilder, llvm::Type* type, llvm::Type* origType, llvm::Value* operand, size_t numRecursions) {
         if (numRecursions >= s_RecursiveAmount) {
             return operand;
         }
@@ -126,36 +135,37 @@ namespace obfusc {
             }
         }
 
-        int randType = rand() % SubstituteType::Max; //Randomly make obfuscation operation
-        auto randVal = llvm::ConstantInt::get(type, GetRandomNumber(type)); //Get random number for each operation
+        int randType = m_randGen64() % SubstituteType::Max; //Randomly make obfuscation operation
+        auto randVal = llvm::ConstantInt::get(type, GetRandomNumber(origType)); //Get random number for each operation
 
         /* x = (x - randVal) + randVal */
         if (randType == SubstituteType::Add) {
-            auto a = Substitute(irBuilder, type, irBuilder.CreateSub(operand, randVal), numRecursions+1);
+            auto a = Substitute(irBuilder, type, origType, irBuilder.CreateSub(operand, randVal), numRecursions+1);
             return irBuilder.CreateAdd(a, randVal);
         }
 
         /* x = (x + randVal) - randVal */
         else if (randType == SubstituteType::Subtract) {
-            auto a = Substitute(irBuilder, type, irBuilder.CreateAdd(operand, randVal), numRecursions+1);
+            auto a = Substitute(irBuilder, type, origType, irBuilder.CreateAdd(operand, randVal), numRecursions+1);
             return irBuilder.CreateSub(a, randVal);
         }
 
         /* x = (x * randVal) / randVal */
         else if (randType == SubstituteType::Divide) {
-            auto a = Substitute(irBuilder, type, irBuilder.CreateMul(operand, randVal), numRecursions+1);
-            return irBuilder.CreateSDiv(a, randVal);
+            auto a = Substitute(irBuilder, type, origType, operand, numRecursions+1);
+            return irBuilder.CreateSDiv(irBuilder.CreateMul(a, randVal), randVal);
         }
 
         /* x = ~(~x) */
         else if (randType == SubstituteType::Not) {
-            auto a = Substitute(irBuilder, type, irBuilder.CreateNot(operand), numRecursions+1);
-            return irBuilder.CreateNot(a);
+            auto signedMax = llvm::ConstantInt::get(type, GetSignedMax(origType)); //Get random number for each operation
+            auto a = Substitute(irBuilder, type, origType, irBuilder.CreateXor(operand, signedMax), numRecursions+1);
+            return irBuilder.CreateXor(a, signedMax);
         }
 
         /* x = (x ^ randVal) ^ randVal */
         else if (randType == SubstituteType::Xor) {
-            auto a = Substitute(irBuilder, type, irBuilder.CreateXor(operand, randVal), numRecursions+1);
+            auto a = Substitute(irBuilder, type, origType, irBuilder.CreateXor(operand, randVal), numRecursions+1);
             return irBuilder.CreateXor(a, randVal);
         }
 
