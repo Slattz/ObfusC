@@ -31,5 +31,16 @@
 *.out
 *.app
 
+# IDA Pro
+*.id0
+*.id1
+*.id2
+*.nam
+*.til
+linux_server64
+
+#Misc
 build/
 *.ll
+mbaTest
+TestAll
