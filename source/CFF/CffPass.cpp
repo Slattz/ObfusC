@@ -10,9 +10,7 @@ namespace obfusc {
     CffPass::~CffPass() {}
 
     bool CffPass::obfuscate(llvm::Module& mod, llvm::Function& func) {
-        // Lower switch
-        llvm::createLowerSwitchPass()->runOnFunction(func);
-
+        // Copy original blocks
         std::vector<llvm::BasicBlock *> origBB;
         for (auto& block : func) {
             if (isa<llvm::InvokeInst>(block.getTerminator())) {
@@ -56,7 +54,7 @@ namespace obfusc {
 
         // Create switch variable and set as it
         llvm::AllocaInst* switchVar = new llvm::AllocaInst(llvm::Type::getInt32Ty(func.getContext()), 0, "switchVar", insert);
-        new llvm::StoreInst(llvm::ConstantInt::get(llvm::Type::getInt32Ty(func.getContext()), m_randGen64()), switchVar, insert);
+        new llvm::StoreInst(llvm::ConstantInt::get(llvm::Type::getInt32Ty(func.getContext()), 0), switchVar, insert);
 
         // Create main loop
         llvm::BasicBlock* loopEntry = llvm::BasicBlock::Create(func.getContext(), "loopEntry", &func, insert);
@@ -147,6 +145,7 @@ namespace obfusc {
         }
 
         fixStack(func);
+        //func.viewCFG();
 
         return true;
     }
@@ -195,7 +194,7 @@ namespace obfusc {
                 llvm::DemotePHIToStack(phi, func.begin()->getTerminator());
             }
 
-            if (tmpReg.size() != 0 || tmpPhi.size() != 0) {
+            if (tmpReg.size() == 0 || tmpPhi.size() == 0) {
                 break;
             }
         }
