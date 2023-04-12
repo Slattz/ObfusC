@@ -45,4 +45,6 @@ build/
 mbaTest
 isubTest
 bcfTest
+cffTest
 TestAll
+TestAll_NoObfusC

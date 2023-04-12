@@ -55,6 +55,32 @@
                 "reveal": "always",
                 "panel": "dedicated"
             }
+        },
+        {
+            "label": "Run All Tests (No Obfuscation)",
+            "type": "shell",
+            "command": "/usr/bin/clang++-15",
+            "options": {
+                "cwd": "${workspaceFolder}/tests"
+            },
+            "args": [
+                "-g",
+                "-std=c++2b",
+                "-DOBFUSC_TEST_BUILD_ALL",
+                "${fileDirname}/**.cpp",
+                "-o",
+                "${fileDirname}/${fileBasenameNoExtension}_NoObfusC"
+            ],
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build"
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            }
         }
     ]
 }
