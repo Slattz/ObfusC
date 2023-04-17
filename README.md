@@ -37,10 +37,16 @@ This involves the transformation of a program's control flow, the sequence of in
 
 ![Alt text](images/iSub.png?raw=true)
 
----
-
 # Download
 Latest Release: [Here](https://github.com/Slattz/ObfusC/releases/latest)
+
+# Usage
+
+Add the following to your compile arguments:
+
+```
+-fplugin=./libObfusC.so -fpass-plugin=./libObfusC.so
+```
 
 # Building on Linux
 
